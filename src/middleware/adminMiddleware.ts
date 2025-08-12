@@ -2,10 +2,10 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 interface JwtPayload {
   userId: number;
-  // add other claims if needed
+  isAdmin: boolean;
 }
 
-export const authMiddleware = (
+export const adminMiddleware = (
   req: Request,
   res: Response,
   next: NextFunction
@@ -23,9 +23,15 @@ export const authMiddleware = (
   try {
     const secret = process.env.JWT_SECRET!;
     const decoded = jwt.verify(token, secret) as JwtPayload;
-    // Attach user info to req object
-    (req as any).user = { id: decoded.userId };
-    next();
+    if (decoded.isAdmin) {
+      (req as any).user = { id: decoded.userId };
+      next();
+    } else {
+      return res.status(403).json({
+        status: 0,
+        message: "You are not authorized to perform this action",
+      });
+    }
   } catch (err) {
     return res
       .status(401)

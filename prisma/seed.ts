@@ -62,15 +62,6 @@ async function main() {
       image: "assets/img/shop/category-thumb-8.jpg",
     },
   ];
-
-  for (const cat of categories) {
-    await prisma.category.upsert({
-      where: { name: cat.name },
-      update: {},
-      create: cat,
-    });
-  }
-  console.log("Seeded categories");
 }
 
 main()

@@ -6,13 +6,15 @@ import {
   updateCategory,
   deleteCategory,
 } from "../controllers/categoryController";
-import { authMiddleware } from "../middleware/auth";
+import { validate } from "../utils/validate";
+import { categorySchema } from "../types/category";
+import { adminMiddleware } from "../middleware/adminMiddleware";
 
 const router = Router();
 router.get("/", getCategories);
-router.get("/categories/:id", getCategoryById);
-router.post("/", authMiddleware, createCategory);
-router.put("/categories/:id", authMiddleware, updateCategory);
-router.delete("/categories/:id", authMiddleware, deleteCategory);
+router.get("/:id", getCategoryById);
+router.post("/", adminMiddleware, validate(categorySchema), createCategory);
+router.put("/:id", adminMiddleware, validate(categorySchema), updateCategory);
+router.delete("/:id", adminMiddleware, deleteCategory);
 
 export default router;

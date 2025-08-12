@@ -22,16 +22,54 @@ export const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
     const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) return res.status(401).json({ error: "Invalid credentials" });
+    if (!user)
+      return res
+        .status(401)
+        .json({ status: 0, message: "Invalid credentials" });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(401).json({ error: "Invalid credentials" });
+    if (!isMatch)
+      return res
+        .status(401)
+        .json({ status: 0, message: "Invalid credentials" });
 
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, {
-      expiresIn: "1h",
-    });
-    res.json({ token });
+    const token = jwt.sign(
+      { userId: user.id, isAdmin: user.isAdmin },
+      process.env.JWT_SECRET!,
+      {
+        expiresIn: "1h",
+      }
+    );
+    res.json({ status: 1, token: token, user: user });
   } catch (err) {
-    res.status(500).json({ error: "Login failed" });
+    res.status(500).json({ status: 0, message: "Login failed" });
+  }
+};
+
+export const adminLogin = async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user)
+      return res
+        .status(401)
+        .json({ status: 0, message: "Invalid credentials" });
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch || !user.isAdmin)
+      return res
+        .status(401)
+        .json({ status: 0, message: "Invalid credentials" });
+
+    const token = jwt.sign(
+      { userId: user.id, isAdmin: user.isAdmin },
+      process.env.JWT_SECRET!,
+      {
+        expiresIn: "1h",
+      }
+    );
+    res.json({ status: 1, token: token, user: user });
+  } catch (err) {
+    res.status(500).json({ status: 0, message: "Login failed" });
   }
 };

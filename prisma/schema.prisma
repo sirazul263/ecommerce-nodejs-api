@@ -7,28 +7,30 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
-
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
-  firstName String   @default("Unknown")
-  lastName  String   @default("Unknown")
-  isAdmin   Boolean   @default(false)
   password  String
+  firstName String   @default("Unknown")
+  isAdmin   Boolean  @default(false)
+  lastName  String   @default("Unknown")
   createdAt DateTime @default(now())
+  category Category[]
+}
+
+model Category {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  slug        String    @unique
+  image       String
+  status      CategoryStatus @default(ACTIVE)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  createdBy   User      @relation(fields: [createdById], references: [id])
+  createdById Int
 }
 
 enum CategoryStatus {
   ACTIVE
   INACTIVE
-}
-model Category {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
-  slug      String   @unique
-  image     String
-  status     CategoryStatus  @default(ACTIVE)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
